@@ -7,28 +7,42 @@
     <title>Jogo - Blackjack</title>
 </head>
 <body>
-    <div class="chipsTop">
-        <img src="imgs/chip9.png" />
-        <img src="imgs/chip8.png" />
-        <img src="imgs/chip8.png" />
-        <img src="imgs/chip7.png" />
-        <img src="imgs/chip7.png" />
-        <img src="imgs/chip7.png" />
-    </div>
-    <section class="mainMenu">
-        <h2>Blackjack - 21</h2>
-        <div class="options">
-            <button id="play">Jogar</button>
-            <button id="rules">Como Jogar</button>
-            <button id="config">Opções</button>
+    <section class="menu">
+        <div class="mainMenu">
+            <div class="chipsTop">
+                <img src="imgs/chipsMenu.png" />
+            </div>
+            <h2>BLACKJACK</h2>
+            <div class="options">
+                <button id="play">Jogar</button>
+                <button id="rules">Como Jogar</button>
+                <button id="config">Opções</button>
+            </div>
+        </div>
+        
+        <div class="cardsBottom">
+            <img src="imgs/ace_of_clubs.png" class="card" />
+            <img src="imgs/ace_of_hearts.png" class="card" />
+            <img src="imgs/ace_of_spades.png" class="card" />
         </div>
     </section>
-    <div class="cardsBottom">
-        <img src="imgs/" />
-    </div>
+
+    <section class="game">
+        <div id="closeGame" class="closeBtn">✖</div>
+    </section>
+
+    <section class="rules">
+
+    </section>
+
+    <section class="config">
+
+    </section>
+
     <audio id="bgMusic" loop>
         <source src="sounds/background.mp3" type="audio/mpeg">
-      </audio>
+    </audio>
+
     <script src="script.js"></script>
 </body>
 </html>

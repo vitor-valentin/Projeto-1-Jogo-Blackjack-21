@@ -1,4 +1,157 @@
+@font-face{
+    font-family: raniraBold;
+    src: url("fonts/raniraBold.otf");
+}
+
+@font-face{
+    font-family: sindelarBold;
+    src: url("fonts/sindelarBold.otf");
+}
+
 body{
     margin: 0;
     box-sizing: border-box;
+}
+
+section{
+   width: 0;
+   overflow: hidden;
+   transition: all 0.6s ease;
+   position: absolute;
+   height: 100vh;
+   top: 0;
+}
+
+.menu{
+    position: relative;
+    width: 100%;
+    background-color: #1a4e2d;
+    background-image: 
+    repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0, rgba(255,255,255,0.02) 1px, transparent 1px, transparent 5px),
+    repeating-linear-gradient(-45deg, rgba(255,255,255,0.015) 0, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 5px);
+    background-blend-mode: overlay;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+}
+
+.chipsTop{
+    position: absolute;
+    margin-left: -20vh;
+    margin-top: 2px;
+}
+
+.chipsTop img{
+    width: 136px;
+    height: 294px;
+}
+
+.mainMenu h2{
+    font-family: raniraBold;
+    font-size: 100px;
+    color: #e2c598;
+    margin-bottom: 5vh;
+    cursor: default;
+}
+
+.options{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 30px;
+    margin-bottom: 20px;
+}
+
+.options button{
+    font-family: sindelarBold;
+    margin-top: 40px;
+    padding: 25px 110px;
+    background-color: #e2c598;
+    border-radius: 8px;
+    color: #2f230c;
+    font-size: 50px;
+    border: none;
+    border-bottom: 4px solid #938159;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 10px 10px 0 rgba(0, 0, 0, 0.1);
+}
+
+.options button:hover{
+    box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.1);;
+    transform: translate(3px, 3px);
+}
+
+.cardsBottom{
+    position: fixed;
+    bottom: 300px;
+    right: 300px;
+}
+
+.cardsBottom img{
+    position: absolute;
+    width: 300px;
+    height: auto;
+    transition: transform 0.2s ease;
+}
+
+.card:nth-child(1) {
+    transform: rotate(-30deg);
+    left: -100px;
+    top: 60px;
+    z-index: 1;
+}
+
+.card:nth-child(2) {
+    transform: rotate(-20deg);
+    left: -50px;
+    top: 20px;
+    z-index: 2;
+}
+.card:nth-child(3) {
+    transform: rotate(-10deg);
+    left: 40px;
+    top: -20px;
+    z-index: 3;
+}
+
+.card:nth-child(1):hover {
+    transform: rotate(-30deg) translateY(-20px);
+}
+.card:nth-child(2):hover {
+    transform: rotate(-20deg) translateY(-20px);
+}
+.card:nth-child(3):hover {
+    transform: rotate(-10deg) translateY(-20px);
+}
+
+.game{
+    background-color: #1a4e2d;
+    background-image: 
+    repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0, rgba(255,255,255,0.02) 1px, transparent 1px, transparent 5px),
+    repeating-linear-gradient(-45deg, rgba(255,255,255,0.015) 0, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 5px);
+    background-blend-mode: overlay;
+}
+
+.game .closeBtn{
+    width: 50px;
+    height: 50px;
+    background-color: #e2c598;
+    border-radius: 50%;
+    position: absolute;
+    top: 20px;
+    left: 30px;
+    display: flex;
+    font-size: 32px;
+    justify-content: center;
+    align-items: center;
+    color: #2f230c;
+    cursor: pointer;
+    font-family: sindelarBold;
+    transition: all 0.3s ease;
+}
+
+.closeBtn:hover{
+    transform: scale(1.1);
 }
