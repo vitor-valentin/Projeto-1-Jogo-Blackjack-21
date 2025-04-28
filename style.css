@@ -11,15 +11,22 @@
 body{
     margin: 0;
     box-sizing: border-box;
+    background-color: #1a4e2d;
 }
 
 section{
-   width: 0;
-   overflow: hidden;
-   transition: all 0.6s ease;
-   position: absolute;
-   height: 100vh;
-   top: 0;
+    width: 0;
+    overflow: hidden;
+    transition: all 0.6s ease;
+    position: absolute;
+    height: 100vh;
+    top: 0;
+    background-color: #1a4e2d;
+    background-image: 
+    repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0, rgba(255,255,255,0.02) 1px, transparent 1px, transparent 5px),
+    repeating-linear-gradient(-45deg, rgba(255,255,255,0.015) 0, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 5px);
+    background-blend-mode: overlay;
+    z-index: 5;
 }
 
 .menu{
@@ -96,43 +103,36 @@ section{
     transition: transform 0.2s ease;
 }
 
-.card:nth-child(1) {
+.mCard:nth-child(1) {
     transform: rotate(-30deg);
     left: -100px;
     top: 60px;
     z-index: 1;
 }
 
-.card:nth-child(2) {
+.mCard:nth-child(2) {
     transform: rotate(-20deg);
     left: -50px;
     top: 20px;
     z-index: 2;
 }
-.card:nth-child(3) {
+.mCard:nth-child(3) {
     transform: rotate(-10deg);
     left: 40px;
     top: -20px;
     z-index: 3;
 }
 
-.card:nth-child(1):hover {
+.mCard:nth-child(1):hover {
     transform: rotate(-30deg) translateY(-20px);
 }
-.card:nth-child(2):hover {
+.mCard:nth-child(2):hover {
     transform: rotate(-20deg) translateY(-20px);
 }
-.card:nth-child(3):hover {
+.mCard:nth-child(3):hover {
     transform: rotate(-10deg) translateY(-20px);
 }
 
-.game{
-    background-color: #1a4e2d;
-    background-image: 
-    repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0, rgba(255,255,255,0.02) 1px, transparent 1px, transparent 5px),
-    repeating-linear-gradient(-45deg, rgba(255,255,255,0.015) 0, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 5px);
-    background-blend-mode: overlay;
-}
 
 .game .closeBtn{
     width: 50px;
@@ -154,4 +154,165 @@ section{
 
 .closeBtn:hover{
     transform: scale(1.1);
+}
+
+.card-stack {
+    position: absolute;
+    top: 10vh;
+    right: 20vh;
+    width: 200px;
+    height: 300px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.card-stack:hover{
+    transform: scale(1.05);
+}
+
+.card-stack .card {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image: url('imgs/cardBackBlack.png'); 
+    background-size: cover;
+    background-position: center;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+    transition: transform 0.3s;
+}
+
+.card-stack .card:nth-child(1) { top: 4px; left: 4px; z-index: 3; }
+.card-stack .card:nth-child(2) { top: 6px; left: 6px; z-index: 2; }
+.card-stack .card:nth-child(3) { top: 8px; left: 8px; z-index: 1; }
+
+.space{
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 350px;
+    pointer-events: none;
+}
+
+.dealer{
+    top: 0;
+}
+
+.player{
+    bottom: 0;
+}
+
+.cardSpots{
+    width: 470px;
+    height: 300px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.cardSpot{
+    width: 210px;
+    height: 310px;
+    border: 2px solid #e2c598;
+    border-radius: 15px;
+}
+
+.chipsSpot{
+    position: absolute;
+    top: -2vh;
+    right: 40vh;
+    width: 200px;
+    height: 200px;
+    border: 2px solid #e2c598;
+    border-radius: 100%;
+}
+
+.player p{
+    color: #2f230c;
+    font-family: sindelarBold;
+    position: absolute;
+    font-size: 20px;
+    width: 300px;
+    
+}
+
+.player p span{
+    color: #e2c598;
+}
+
+.player p:nth-child(3)
+{
+    top: 0;
+    right: 2vh;
+}
+
+.player p:nth-child(4){
+    top: 25px;
+    right: 1vh;
+}
+
+.playerOpts{
+    position: absolute;
+    width: 100%;
+    height: 40px;
+    bottom: 4%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.opts{
+    width: 70vh;
+    display: flex;
+    justify-content: space-between;
+}
+
+.btnOpt{
+    cursor: pointer;
+    background-color: #e2c598;
+    padding: 20px 50px;
+    font-size: 20px;
+    font-family: sindelarBold;
+    border: 0; 
+    color: #2f230c;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+    opacity: 0.8;
+}
+
+.btnOpt:hover{
+    transform: scale(1.05);
+    opacity: 1;
+}
+
+.smallMenu{
+    position: absolute;
+    width: 125px;
+    height: 50px;
+    left: 2vh;
+    bottom: 2vh;
+    display: flex;
+    justify-content: space-between;
+}
+
+.gameBtn{
+    width: 50px;
+    height: 50px;
+    background-color: #e2c598;
+    border-radius: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.gameBtn:hover{
+    transform: scale(1.1);
+}
+
+.gameBtn img{
+    width: 40px;
+    height: 40px;
 }
