@@ -21,14 +21,54 @@
         </div>
         
         <div class="cardsBottom">
-            <img src="imgs/ace_of_clubs.png" class="card" />
-            <img src="imgs/ace_of_hearts.png" class="card" />
-            <img src="imgs/ace_of_spades.png" class="card" />
+            <img src="imgs/ace_of_clubs.png" class="mCard" />
+            <img src="imgs/ace_of_hearts.png" class="mCard" />
+            <img src="imgs/ace_of_spades.png" class="mCard" />
         </div>
     </section>
 
     <section class="game">
-        <div id="closeGame" class="closeBtn">✖</div>
+        <div id="closeBtn" class="closeBtn">✖</div>
+
+        <div class="card-stack">
+            <div class="card"></div>
+            <div class="card"></div>
+            <div class="card"></div>
+        </div>
+
+        <div class="dealer space">
+            <div class="cardSpots">
+                <div class="cardSpot"></div>
+                <div class="cardSpot"></div>
+            </div>
+        </div>
+
+        <div class="player space">
+            <div class="cardSpots">
+                <div class="cardSpot"></div>
+                <div class="cardSpot"></div>
+            </div>
+            <div class="chipsSpot"></div>
+            <p>Total de fichas: <span id="totalChips">0</span></p>
+            <p>Fichas apostadas: <span id="bettedChips">0</span></p>
+        </div>
+
+        <div class="playerOpts">
+            <div class="opts">
+                <button class="btnOpt" id="stand">Parar</button>
+                <button class="btnOpt" id="hit">Pedir</button>
+                <button class="btnOpt" id="double">Dobrar</button>
+            </div>
+        </div>
+
+        <div class="smallMenu">
+            <div class="gameBtn" id="rules">
+                <img src="imgs/help.png" />
+            </div>
+            <div class="gameBtn" id="config">
+                <img src="imgs/settings.png" />
+            </div>
+        </div>
     </section>
 
     <section class="rules">
@@ -40,8 +80,14 @@
     </section>
 
     <audio id="bgMusic" loop>
-        <source src="sounds/background.mp3" type="audio/mpeg">
+        <source src="sounds/background.mp3" type="audio/mpeg" />
     </audio>
+
+    <audio id="seClick"><source src="sounds/click.mp3" /></audio>
+    <audio id="seChips"><source src="sounds/chips.mp3" /></audio>
+    <audio id="seDeal"><source src="sounds/deal.mp3" /></audio>
+    <audio id="seFlip"><source src="sounds/flip.mp3" /></audio>
+    <audio id="seWin"><source src="sounds/win.mp3" /></audio>
 
     <script src="script.js"></script>
 </body>
