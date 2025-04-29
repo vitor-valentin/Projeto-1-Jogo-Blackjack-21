@@ -29,6 +29,24 @@ section{
     z-index: 5;
 }
 
+section .closeBtn{
+    width: 50px;
+    height: 50px;
+    background-color: #e2c598;
+    border-radius: 50%;
+    position: absolute;
+    top: 20px;
+    left: 30px;
+    display: flex;
+    font-size: 32px;
+    justify-content: center;
+    align-items: center;
+    color: #2f230c;
+    cursor: pointer;
+    font-family: sindelarBold;
+    transition: all 0.3s ease;
+}
+
 .menu{
     position: relative;
     width: 100%;
@@ -133,25 +151,6 @@ section{
     transform: rotate(-10deg) translateY(-20px);
 }
 
-
-.game .closeBtn{
-    width: 50px;
-    height: 50px;
-    background-color: #e2c598;
-    border-radius: 50%;
-    position: absolute;
-    top: 20px;
-    left: 30px;
-    display: flex;
-    font-size: 32px;
-    justify-content: center;
-    align-items: center;
-    color: #2f230c;
-    cursor: pointer;
-    font-family: sindelarBold;
-    transition: all 0.3s ease;
-}
-
 .closeBtn:hover{
     transform: scale(1.1);
 }
@@ -202,6 +201,26 @@ section{
 
 .player{
     bottom: 0;
+}
+
+.space label{
+    position: absolute;
+    left: 0;
+    width: 100%;
+    pointer-events: none;
+    text-align: center;
+    font-size: 34px;
+    color: #e2c598;
+    font-family: raniraBold;
+}
+
+.player label{
+    top: -10px;
+}
+
+.dealer label{
+    top: auto;
+    bottom: -30px;
 }
 
 .cardSpots{
@@ -260,6 +279,7 @@ section{
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 10;
 }
 
 .opts{
@@ -294,6 +314,7 @@ section{
     bottom: 2vh;
     display: flex;
     justify-content: space-between;
+    z-index: 11;
 }
 
 .gameBtn{
@@ -315,4 +336,50 @@ section{
 .gameBtn img{
     width: 40px;
     height: 40px;
+}
+
+.cardContainer{
+    position: absolute;
+    margin-top: 6px;
+    margin-left: 5px;
+    perspective: 1000px;
+    width: 200px;
+    height: 300px;
+    z-index: 10;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+}
+
+.flip{
+    transform: rotateY(180deg);
+}
+
+.playingCard{
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.8s;
+}
+
+.cardSide {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+
+.cardFront {
+    background-size: cover;
+    background-position: center;
+    transform: rotateY(180deg);
+}
+
+.cardBack {
+    background-size: cover;
+    background-position: center;
+    
 }
