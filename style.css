@@ -237,6 +237,18 @@ section .closeBtn{
     border-radius: 15px;
 }
 
+.extraCards{
+    position: absolute;
+    display: flex;
+    width: 70vh;
+    justify-content: center;   
+    left: 0;
+}
+
+.extraCards .cardSpot{
+    width: 550px;
+}
+
 .chipsSpot{
     position: absolute;
     top: -2vh;
@@ -260,14 +272,14 @@ section .closeBtn{
     color: #e2c598;
 }
 
-.player p:nth-child(3)
+.player p:nth-child(4)
 {
     top: 0;
     right: 2vh;
 }
 
-.player p:nth-child(4){
-    top: 25px;
+.player p:nth-child(5){
+    top: 20px;
     right: 1vh;
 }
 
@@ -308,7 +320,7 @@ section .closeBtn{
 
 .smallMenu{
     position: absolute;
-    width: 125px;
+    width: 175px;
     height: 50px;
     left: 2vh;
     bottom: 2vh;
@@ -347,7 +359,6 @@ section .closeBtn{
     height: 300px;
     z-index: 10;
     border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.5);
 }
 
 .flip{
