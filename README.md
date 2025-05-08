@@ -17,7 +17,7 @@ Um projeto simples e elegante de **Blackjack (21)** desenvolvido com **HTML, CSS
 ## 📋 Como Jogar
 
 1. Clique em **"Jogar"** no menu principal.
-2. O jogo inicia com uma aposta automática.
+2. Clique no baralho para iniciar o jogo.
 3. Utilize os botões:
    - **Pedir**: solicitar mais uma carta.
    - **Parar**: encerrar sua jogada e passar para o dealer.
