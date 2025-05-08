@@ -1,10 +1,10 @@
 //TODO: 
-// Add sound effects to flipping and dealing cards
-// Make a condition in flipCard() so it only counts the cards when necessary
-// Move the game buttons to the blank space in the left
+// Get new chips images
 // Animate and use the sound effects for the chips
 // How to play section
 // Config section
+// Double option
+// Change the setting of the player automatically winning when getting 21 points
 
 //Game constants
 const cardImages = [];
@@ -35,6 +35,7 @@ var bgCard = "Black";
 var points = [0, 0];
 var dealingInProgress = false;
 var gameReloading = false;
+var standed = false;
 
 // DOM Elements
 //Main Menu Buttons
@@ -50,7 +51,7 @@ const bgMusic = document.getElementById("bgMusic");
 const seClick = document.getElementById("seClick");
 const seChips = document.getElementById("seChips");
 const seFlip = document.getElementById("seFlip");
-const seWin = document.getElementById("seWin");
+const seDeal = document.getElementById("seDeal");
 //Changeable values on screen
 const screenVariables = [
     document.getElementById("totalChips"),
@@ -76,6 +77,12 @@ const extraCardsSpots = [
 //Other buttons
 const closeBtn = document.querySelectorAll("#closeBtn");
 
+//Miscelaneous functions
+function delay(ms)
+{
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 //Game functions
 function dealCard(card, destination, flip, pointer, returning = false)
 {
@@ -100,6 +107,7 @@ function dealCard(card, destination, flip, pointer, returning = false)
 
     requestAnimationFrame(() => {
         clone.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+        playSound(seDeal);
     });
 
     clone.addEventListener('transitionend', () => {
@@ -119,6 +127,14 @@ function dealCard(card, destination, flip, pointer, returning = false)
 
         dealingInProgress = false;
     });
+}
+
+function playSound(sound)
+{
+    const soundClone = sound.cloneNode(true);
+    document.body.appendChild(soundClone);
+    soundClone.play();
+    setTimeout(() => {soundClone.remove();}, 1000);
 }
 
 function createCard(card, backCard)
@@ -167,6 +183,7 @@ function resetRemainingCards()
 function flipCard(card, pointer)
 {
     card.querySelector(".playingCard").classList.toggle("flip");
+    playSound(seFlip);
     if (points[pointer-2] < 21 && !gameReloading) countPoints(card, pointer);
 }
 
@@ -200,7 +217,14 @@ function returnCards()
     cardSpots.forEach((type) => {
         type.forEach((spot) => {
             let card = spot.querySelector(".cardContainer");
-            let flip = card.querySelector(".playingCard").classList.contains("flip");
+            let flip;
+            try
+            {
+                flip = card.querySelector(".playingCard").classList.contains("flip");
+            }catch (error)
+            {
+                flip = false;
+            }
             setTimeout(dealCard, (250 * c), card, cardStack, flip, (spot.parentElement.parentElement.classList.contains("player") ? 2 : 3), true);
             c++;
         });
@@ -244,6 +268,21 @@ function playerLost()
     setTimeout(startRound, (500 * c));
 }
 
+function playerTied()
+{
+    gameReloading = true;
+
+    totalChips += betted;
+    betted = 0;
+
+    changeScreenVariable(0, 1);
+    changeScreenVariable(totalChips, 0);
+
+    let c = returnCards();
+
+    setTimeout(startRound, (500 * c));
+}
+
 function verifyHasAce(index, newValue)
 {
     cardSpots[index].forEach((spot) => {
@@ -273,21 +312,32 @@ function countPoints(card, pointer){
 
     points[index] += parseInt(value);
     changeScreenVariable(points[index], pointer);
+
     if(points[index] > 21)
     {
         if(index == 0) setTimeout(playerLost, 1000);
         if(index == 1) setTimeout(playerWon, 1000);
     }else if(points[index] == 21)
     {
-        if(index == 0); setTimeout(playerWon, 1000);
+        if(index == 0) setTimeout(playerWon, 1000);
         if(index == 1) setTimeout(playerLost, 1000);
     }
+}
+
+function drawCard(pointer, flip, destination)
+{
+    let randomCard = selectRandomCard();
+    let card = createCard(randomCard, bgCard);
+
+    dealCard(card, destination, flip, pointer);
+    return card;
 }
 
 function startRound()
 {
     gameRunning = true;
     gameReloading = false;
+    standed = false;
 
     resetRemainingCards();
     resetPoints();
@@ -295,19 +345,9 @@ function startRound()
     bet(betChips);
     
     let c = 1;
-    let playerCards = [];
-    let dealerCards = [];
-    playerCards.push(selectRandomCard());
-    playerCards.push(selectRandomCard());
-    dealerCards.push(selectRandomCard());
-    dealerCards.push(selectRandomCard());
-
     cardSpots.forEach((type) => {
-        let i = 0;
         type.forEach((spot) => {
-            let card = createCard(playerCards[i], bgCard);
-            setTimeout(dealCard, (250 * c), card, spot, (c == 4 ? false : true), (spot.parentElement.parentElement.classList.contains("player") ? 2 : 3));
-            i++;
+            setTimeout(drawCard, (250 * c), (spot.parentElement.parentElement.classList.contains("player") ? 2 : 3), (c == 4 ? false : true),  spot);
             c++;
         });
     });
@@ -326,17 +366,90 @@ function countExtraCards()
     return count;
 }
 
-function hitOption(pointer)
+function getCardValue(card)
+{
+    if(specials.includes(card)) return 10;
+    if(card == "ace") return 11;
+    return parseInt(card);
+}
+
+function calculateDrawRisk(botPoints, deck)
+{
+    let bustCount = 0;
+    let totalCards = deck.length;
+
+    deck.forEach((card) => {
+        let value = card.split("_")[0];
+        value = getCardValue(value);
+        
+        if(botPoints + value > 21)
+        {
+            bustCount++;
+        }
+    });
+
+    return bustCount / totalCards;
+}
+
+function dealerDecisionMaking()
+{
+    if(points[1] > points[0])
+    {
+        return false;
+    }
+
+    if(points[0] > points[1])
+    {
+        return true;
+    }
+
+    let risk = calculateDrawRisk(points[1], remainingCards);
+    return risk < 0.7;
+}
+
+async function hitOption(pointer)
 {
     if (dealingInProgress) return;
+    if (standed && pointer != 3) return;
 
     let newCard = selectRandomCard();
-    let marginLeft = countExtraCards()[0];
+    let marginLeft = countExtraCards()[pointer-2];
     marginLeft = marginLeft == 0 ? 5 : marginLeft * 25;
     marginLeft += "px";
     let card = createCard(newCard, bgCard);
-    setTimeout(dealCard, 250, card, extraCardsSpots[0], true, pointer);
+    setTimeout(dealCard, 250, card, extraCardsSpots[pointer-2], true, pointer);
     setTimeout(() => {card.style.marginLeft = marginLeft}, 1000)
+    await delay(1000);
+}
+
+async function standOption()
+{
+    if (dealingInProgress) return;
+    if (standed) return;
+
+    standed = true;
+
+    cardSpots[1].forEach((spot) => {
+        const card = spot.querySelector(".cardContainer");
+        if(!card.firstChild.classList.contains("flip"))
+        {
+            flipCard(card, 3);
+        }
+    });
+
+    while(dealerDecisionMaking())
+    {
+        await hitOption(3);
+    }
+
+    if(dealingInProgress) return;
+    if(points[1] > points[0] && points[1] < 21)
+    {
+        playerLost();
+    }else if(points[1] == points[0])
+    {
+        playerTied();
+    }
 }
 
 function reloadGame()
@@ -346,7 +459,7 @@ function reloadGame()
 
     gameReloading = true;
 
-    let c =returnCards();
+    let c = returnCards();
     totalChips = startingChips;
     betted = 0;
 
@@ -396,6 +509,10 @@ cardStack.addEventListener("click", () => {
 
         hit.addEventListener("click", () => {
             hitOption(2);
+        });
+
+        stand.addEventListener("click", () => {
+            standOption();
         });
 
         restart.addEventListener("click", () => {

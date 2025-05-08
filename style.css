@@ -45,6 +45,7 @@ section .closeBtn{
     cursor: pointer;
     font-family: sindelarBold;
     transition: all 0.3s ease;
+    z-index: 99;
 }
 
 .menu{
