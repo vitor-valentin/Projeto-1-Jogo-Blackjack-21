@@ -2,9 +2,9 @@
 // Get new chips images
 // Animate and use the sound effects for the chips
 // How to play section
-// Config section
-// Double option
 // Change the setting of the player automatically winning when getting 21 points
+// Not enough chips
+// Losing message
 
 //Game constants
 const cardImages = [];
@@ -74,6 +74,13 @@ const extraCardsSpots = [
     document.querySelector(".player .extraCards .cardSpot"),
     document.querySelector(".dealer .extraCards .cardSpot")
 ];
+//Config Menu
+const musicVolume = document.getElementById("musicVolume");
+const sfxVolume = document.getElementById("sfxVolume");
+const backCardOptions = document.querySelectorAll(".card-option");
+const multiplier = document.getElementById("multiplier");
+const startChips = document.getElementById("startingChips");
+const chipsBet = document.getElementById("chipsBet");
 //Other buttons
 const closeBtn = document.querySelectorAll("#closeBtn");
 
@@ -132,6 +139,7 @@ function dealCard(card, destination, flip, pointer, returning = false)
 function playSound(sound)
 {
     const soundClone = sound.cloneNode(true);
+    soundClone.volume = sound.volume;
     document.body.appendChild(soundClone);
     soundClone.play();
     setTimeout(() => {soundClone.remove();}, 1000);
@@ -442,13 +450,32 @@ async function standOption()
         await hitOption(3);
     }
 
-    if(dealingInProgress) return;
     if(points[1] > points[0] && points[1] < 21)
     {
         playerLost();
     }else if(points[1] == points[0])
     {
         playerTied();
+    }
+}
+
+async function doubleOption()
+{
+    if (dealingInProgress) return;
+    if (standed) return;
+
+    drawCard(2, true, extraCardsSpots[0]);
+
+    totalChips -= betChips;
+    betted += betChips;
+
+    changeScreenVariable(totalChips, 0);
+    changeScreenVariable(betted, 1);
+
+    await delay(1000);
+
+    if(points[0] < 21){
+        await standOption();
     }
 }
 
@@ -472,7 +499,7 @@ function reloadGame()
 //Menu Event Listeners
 playBtn.addEventListener("click", () => {
     gamePage.style.width = "100%";
-    seClick.play();
+    playSound(seClick);
     bgMusic.play();
     changeScreenVariable(totalChips, 0);
 });
@@ -480,26 +507,84 @@ playBtn.addEventListener("click", () => {
 rulesBtn.forEach((btn) => {
     btn.addEventListener("click", () => {
         rulesPage.style.width = "100%";
-        seClick.play();
+        playSound(seClick);
     });
 });
 
 configBtn.forEach((btn) => {
     btn.addEventListener("click", () => {
         configPage.style.width = "100%";
-        seClick.play();
+        playSound(seClick);
     });
 });
 
 closeBtn.forEach((btn) => {
     btn.addEventListener("click", () => {
         btn.parentElement.style.width = "0";
-        seClick.play();
+        playSound(seClick);
         if(btn.parentElement.classList.contains("game"))
         {
             bgMusic.pause();
         }
     });
+});
+
+//Configuration Event Listeners
+musicVolume.addEventListener("input", () => {
+    bgMusic.volume = musicVolume.value / 100;
+});
+
+sfxVolume.addEventListener("input", () => {
+    seClick.volume = sfxVolume.value / 100;
+    seChips.volume = sfxVolume.value / 100;
+    seDeal.volume = sfxVolume.value / 100;
+    seFlip.volume = sfxVolume.value / 100;
+});
+
+backCardOptions.forEach((option) => {
+    option.addEventListener("click", () => {
+        if(option.id != "selected")
+        {
+            document.getElementById("selected").id = "";
+            option.id = "selected";
+            bgCard = option.getAttribute("value");
+            
+            cardStack.querySelectorAll(".card").forEach((card) => {
+                card.style.backgroundImage = "url(imgs/cardBack"+bgCard+".png)";
+            });
+
+            const currentCards = document.querySelectorAll(".cardContainer");
+            currentCards.forEach((card) => {
+                card.querySelector(".cardBack").style.backgroundImage = "url(imgs/cardBack"+bgCard+".png)";
+            });
+        }
+    });
+});
+
+multiplier.addEventListener("input", () => {
+    if (multiplier.value !== "" && parseInt(multiplier.value) < 2) {
+        multiplier.value = 2;
+    }
+    chipsMultiplier = multiplier.value != "" ? parseInt(multiplier.value) : 2;
+});
+
+startChips.addEventListener("blur", () => {
+    if (parseInt(startChips.value) < 500 || startChips.value == "") {
+        startChips.value = 500;
+    }
+    startingChips = parseInt(startChips.value);
+    if(!gameRunning)
+    {
+        totalChips = startingChips;
+        changeScreenVariable(totalChips, 0);
+    }
+});
+
+chipsBet.addEventListener("blur", () => {
+    if (parseInt(chipsBet.value) < 50 || chipsBet.value == "") {
+        chipsBet.value = 50;
+    }
+    betChips = parseInt(chipsBet.value);
 });
 
 //Game Event Listeners
@@ -513,6 +598,10 @@ cardStack.addEventListener("click", () => {
 
         stand.addEventListener("click", () => {
             standOption();
+        });
+
+        double.addEventListener("click", () => {
+            doubleOption();
         });
 
         restart.addEventListener("click", () => {

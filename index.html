@@ -88,6 +88,47 @@
 
     <section class="config">    
         <div id="closeBtn" class="closeBtn">✖</div>
+
+        <div class="configOptions">
+            <h1>Opções</h1>
+        
+            <div class="option">
+              <label for="musicVolume">Música</label>
+              <input type="range" id="musicVolume" min="0" max="100" value="100" />
+            </div>
+        
+            <div class="option">
+              <label for="sfxVolume">Efeitos</label>
+              <input type="range" id="sfxVolume" min="0" max="100" value="100" />
+            </div>
+        
+            <div class="option">
+              <label for="cardBack">Verso das Cartas</label>
+              <div class="card-options">
+                <div class="card-option black" value="Black" id="selected"></div>
+                <div class="card-option red" value="Red"></div>
+                <div class="card-option blue" value="Blue"></div>
+                <div class="card-option green" value="Green"></div>
+                <div class="card-option orange" value="Orange"></div>
+                <div class="card-option purple" value="Purple"></div>
+              </div>
+            </div>
+        
+            <div class="option">
+              <label for="multiplier">Multiplicador de Vitória</label>
+              <input type="number" id="multiplier" min="2" value="2" />
+            </div>
+        
+            <div class="option">
+              <label for="startingChips">Fichas Iniciais</label>
+              <input type="number" id="startingChips" min="500" value="500" />
+            </div>
+
+            <div class="option">
+                <label for="startingChips">Fichas p/ Aposta</label>
+                <input type="number" id="chipsBet" min="50" value="50" />
+              </div>
+        </div>
     </section>
 
     <audio id="bgMusic" loop>
