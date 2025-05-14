@@ -260,6 +260,9 @@ section .closeBtn{
     height: 200px;
     border: 2px solid #e2c598;
     border-radius: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .player p{
@@ -589,7 +592,64 @@ input[type="number"] {
     outline: 3px solid rgba(226, 197, 152, 0.5);
     transform: scale(1.15);
 }
+
+.rules{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.rules h1{
+    color: #eac690;
+    font-size: 46px;
+    font-family: raniraBold;
+    position: relative;
+    top: -1vh;
+}
+
+.rules ol{
+    background-color: #153d23;
+    max-width: 80%;
+    overflow-y: auto;
+    background-image: 
+    repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0, rgba(255,255,255,0.02) 1px, transparent 1px, transparent 5px),
+    repeating-linear-gradient(-45deg, rgba(255,255,255,0.015) 0, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 5px);
+    background-blend-mode: overlay;
+    border-radius: 10px;
+}
+
+.rules ol::-webkit-scrollbar {
+    width: 8px;
+}
   
+.rules ol::-webkit-scrollbar-thumb {
+    background-color: #b19464;
+    border-radius: 4px;
+}
+
+.rules li b{    
+    color: #e8c892;
+    font-size: 24px;
+}
+
+.rules li{
+    padding: 20px 10px 10px 0;
+    font-family: sindelarBold;
+    font-size: 20px;
+    color: #c9b890;
+}
+
+.chip
+{
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    background-image: url("imgs/chip.png");
+    background-size: cover;
+    transition: all 0.5s ease;
+    transform: translate(700px, 700px);
+}
 
 @media (max-width: 1366px) {
     .mainMenu h2 {

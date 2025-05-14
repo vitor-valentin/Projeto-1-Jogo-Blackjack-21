@@ -1,8 +1,5 @@
 //TODO: 
-// Get new chips images
-// Animate and use the sound effects for the chips
-// How to play section
-// Change the setting of the player automatically winning when getting 21 points
+// Round lost and won notification
 // Not enough chips
 // Losing message
 
@@ -74,6 +71,7 @@ const extraCardsSpots = [
     document.querySelector(".player .extraCards .cardSpot"),
     document.querySelector(".dealer .extraCards .cardSpot")
 ];
+const chipsSpot = document.querySelector(".chipsSpot");
 //Config Menu
 const musicVolume = document.getElementById("musicVolume");
 const sfxVolume = document.getElementById("sfxVolume");
@@ -91,9 +89,9 @@ function delay(ms)
 }
 
 //Game functions
-function dealCard(card, destination, flip, pointer, returning = false)
+function moveElement(card, destination, flip, pointer, returning = false)
 {
-    const cardRect = card.getBoundingClientRect();
+    const elemRect = card.getBoundingClientRect();
     const destRect = destination.getBoundingClientRect();
 
     const clone = card.cloneNode(true);
@@ -101,20 +99,20 @@ function dealCard(card, destination, flip, pointer, returning = false)
 
     card.style.display = "none";
     clone.style.position = 'fixed';
-    clone.style.top = `${cardRect.top}px`;
-    clone.style.left = `${cardRect.left}px`;
-    clone.style.width = `${cardRect.width}px`;
-    clone.style.height = `${cardRect.height}px`;
+    clone.style.top = `${elemRect.top}px`;
+    clone.style.left = `${elemRect.left}px`;
+    clone.style.width = `${elemRect.width}px`;
+    clone.style.height = `${elemRect.height}px`;
     clone.style.transition = 'transform 0.6s ease-in-out';
 
-    const deltaX = destRect.left - cardRect.left;
-    const deltaY = destRect.top - cardRect.top;
+    const deltaX = destRect.left - elemRect.left;
+    const deltaY = destRect.top - elemRect.top;
 
     dealingInProgress = true;
 
     requestAnimationFrame(() => {
         clone.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
-        playSound(seDeal);
+        playSound(seDeal)
     });
 
     clone.addEventListener('transitionend', () => {
@@ -143,6 +141,31 @@ function playSound(sound)
     document.body.appendChild(soundClone);
     soundClone.play();
     setTimeout(() => {soundClone.remove();}, 1000);
+}
+
+function createChip(positioned = false)
+{
+    let chips = [];
+
+    let chip = document.createElement("div");
+    chip.classList.add("chip");
+
+    if(positioned)
+    {
+        chip.style.transform = "translate(0, 0)";
+    }
+
+    chips.push(chip);
+    
+    chipsSpot.appendChild(chip);
+
+    let marginPx = getAmountMarginPxChips();
+
+    chip.style.marginRight = marginPx+"px";
+    chip.style.marginBottom = marginPx+"px";
+    chip.style.zIndex = Math.round(marginPx/2);
+
+    return chips;
 }
 
 function createCard(card, backCard)
@@ -209,13 +232,31 @@ function resetPoints()
     changeScreenVariable(0, 3);
 }
 
+function getAmountMarginPxChips()
+{
+    let allChips = document.querySelectorAll(".chip").length;
+
+    return allChips * 2;
+}
+
 function bet(amount)
 {
     totalChips -= amount;
     betted += amount;
+    
     changeScreenVariable(totalChips, 0);
     changeScreenVariable(betted, 1);
-    //TODO: Add sound and animation play
+    
+    let cAmount = Math.round(amount / 50);
+    cAmount = cAmount > 10 ? 10 : cAmount;
+
+    for(let i = 0; i < cAmount; i++)
+    {
+        setTimeout(() => {
+            let chip = createChip();
+            moveChip(chip);
+        }, 150 * i);
+    }
 }
 
 function returnCards()
@@ -233,14 +274,14 @@ function returnCards()
             {
                 flip = false;
             }
-            setTimeout(dealCard, (250 * c), card, cardStack, flip, (spot.parentElement.parentElement.classList.contains("player") ? 2 : 3), true);
+            setTimeout(moveElement, (250 * c), card, cardStack, flip, (spot.parentElement.parentElement.classList.contains("player") ? 2 : 3), true);
             c++;
         });
     });
 
     extraCardsSpots.forEach((spot) => {
         spot.querySelectorAll(".cardContainer").forEach((card) => {
-            setTimeout(dealCard, (250 * c), card, cardStack, true, (spot.parentElement.parentElement.classList.contains("player") ? 2 : 3), true)
+            setTimeout(moveElement, (250 * c), card, cardStack, true, (spot.parentElement.parentElement.classList.contains("player") ? 2 : 3), true)
             c++;
         });
     });
@@ -248,35 +289,89 @@ function returnCards()
     return c;
 }
 
-function playerWon()
+async function returnAllChips(remove = false)
+{
+    let chips = document.querySelectorAll(".chip");
+
+    chips.forEach(async (chip) => {
+        if(remove)
+        {
+            chip.remove();
+        }else{
+            moveChip(chip, true);
+            await delay(100);
+        }
+    });
+}
+
+async function changeScreenVariableAnim(pointer)
+{
+    let newValue;
+    let oldValue = screenVariables[pointer].textContent;
+
+    switch(pointer)
+    {
+        case 0:
+            newValue = totalChips;
+        case 1:
+            newValue = betted;
+    }
+
+    for(let i = oldValue; i <= newValue; i++)
+    {
+        changeScreenVariable(i, pointer);
+        await delay(10);
+    }
+}
+
+async function playerWon()
 {
     gameReloading = true;
 
+    let oldBetted = betted;
     betted *= chipsMultiplier;
+    let amount = betted - oldBetted;
+    amount = Math.round(amount / 50);
+
+    for(let i = 0; i < amount; i++)
+    {
+        await createChip(true);
+        await delay(150);
+    }
+    
+    await changeScreenVariableAnim(1);
+
     totalChips += betted;
     betted = 0;
     
     changeScreenVariable(0, 1);
-    changeScreenVariable(totalChips, 0);
+    await changeScreenVariableAnim(0);
+
+
+    await returnAllChips();
 
     let c = returnCards();
 
     setTimeout(startRound, (500 * c));
+ 
 }
 
-function playerLost()
+async function playerLost()
 {
     gameReloading = true;
 
     changeScreenVariable(0, 1);
     betted = 0;
 
+    await returnAllChips(true);
+    await delay(1000);
+
     let c = returnCards();
 
     setTimeout(startRound, (500 * c));
 }
 
-function playerTied()
+async function playerTied()
 {
     gameReloading = true;
 
@@ -284,7 +379,10 @@ function playerTied()
     betted = 0;
 
     changeScreenVariable(0, 1);
-    changeScreenVariable(totalChips, 0);
+    await changeScreenVariableAnim(0);
+
+    await returnAllChips();
+    await delay(1000);
 
     let c = returnCards();
 
@@ -323,12 +421,12 @@ function countPoints(card, pointer){
 
     if(points[index] > 21)
     {
-        if(index == 0) setTimeout(playerLost, 1000);
-        if(index == 1) setTimeout(playerWon, 1000);
+        if(index == 0) setTimeout(playerLost, 2000);
+        if(index == 1) setTimeout(playerWon, 2000);
     }else if(points[index] == 21)
     {
-        if(index == 0) setTimeout(playerWon, 1000);
-        if(index == 1) setTimeout(playerLost, 1000);
+        if(index == 0) setTimeout(playerWon, 2000);
+        if(index == 1) setTimeout(playerLost, 2000);
     }
 }
 
@@ -337,8 +435,19 @@ function drawCard(pointer, flip, destination)
     let randomCard = selectRandomCard();
     let card = createCard(randomCard, bgCard);
 
-    dealCard(card, destination, flip, pointer);
+    moveElement(card, destination, flip, pointer);
     return card;
+}
+
+function moveChip(chip, type = "deal")
+{
+    let distance = type == "deal" ? "0" : "700px";
+    chip = chip.style == undefined ? chip[0] : chip;
+
+    requestAnimationFrame(() => {
+        chip.style.transform = `translate(${distance}, ${distance})`;
+        playSound(seChips);
+    });
 }
 
 function startRound()
@@ -425,7 +534,7 @@ async function hitOption(pointer)
     marginLeft = marginLeft == 0 ? 5 : marginLeft * 25;
     marginLeft += "px";
     let card = createCard(newCard, bgCard);
-    setTimeout(dealCard, 250, card, extraCardsSpots[pointer-2], true, pointer);
+    setTimeout(moveElement, 250, card, extraCardsSpots[pointer-2], true, pointer);
     setTimeout(() => {card.style.marginLeft = marginLeft}, 1000)
     await delay(1000);
 }
@@ -466,8 +575,7 @@ async function doubleOption()
 
     drawCard(2, true, extraCardsSpots[0]);
 
-    totalChips -= betChips;
-    betted += betChips;
+    bet(betChips);
 
     changeScreenVariable(totalChips, 0);
     changeScreenVariable(betted, 1);

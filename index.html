@@ -51,12 +51,17 @@
             <div class="extraCards">
                 <div class="cardSpot"></div>
             </div>
+          
             <div class="cardSpots">
                 <label id="playerPoints">0</label>
                 <div class="cardSpot"></div>
                 <div class="cardSpot"></div>
             </div>
-            <div class="chipsSpot"></div>
+        
+            <div class="chipsSpot">
+                <div class="chip"></div>
+            </div>
+          
             <p>Total de fichas: <span id="totalChips">0</span></p>
             <p>Fichas apostadas: <span id="bettedChips">0</span></p>
         </div>
@@ -84,6 +89,62 @@
 
     <section class="rules">
         <div id="closeBtn" class="closeBtn">✖</div>
+        <h1>Como Jogar</h1>
+        <ol>
+            <li>
+                <b>Distribuição das cartas:</b> 
+                O dealer distribui duas cartas para cada jogador e para si mesmo. 
+            </li>
+            <li>
+                <b>Valor das cartas:</b>
+                Cartas de 2 a 10 valem o seu valor nominal, 
+                figuras (Rei, Dama, Valete) valem 10, 
+                e o Ás pode valer 1 ou 11 dependendo do que for mais vatanjoso ao jogador. 
+            </li>
+            <li>
+                <b>Ações do jogador:</b>
+                <ul>
+                    <li>
+                        <b>Pedir:</b>
+                        O jogador pode pedir mais cartas do dealer para tentar chegar a 21.
+                    </li>
+                    <li>
+                        <b>Parar:</b>
+                        O jogador pode parar de pedir cartas se estiver satisfeito com o valor da sua mão. 
+                    </li>
+                    <li>
+                        <b>Dobrar:</b>
+                        O jogador pode dobrar a sua aposta e receber apenas mais uma carta.
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <b>Ações do dealer:</b>
+                Após o jogador pegar todas as suas cartas o dealer vira a carta escondida
+                e pega mais cartas até que sua pontuação seja maior que a do jogador, caso seja
+                um empate o dealer vai decidir se deve arriscar pegar mais uma carda ou parar.
+            </li>
+            <li>
+                <b>Determinação do vencedor:</b>
+                <ul>
+                    <li>
+                        Se o jogador tiver Blackjack (duas cartas somando 21) 
+                        e o dealer não, o jogador ganha uma vez e meia a sua aposta. 
+                    </li>
+                    <li>
+                        Se o jogador e o dealer tiverem Blackjack, a rodada é considerada um empate. 
+                    </li>
+                    <li>
+                        Se o jogador tiver uma mão mais próxima de 21 que o dealer, sem estourar, o jogador vence.
+                    </li>
+                    <li>
+                        Se o jogador ou o dealer estourarem 
+                        (cartas somando mais de 21), perdem a rodada, 
+                        independentemente do outro. 
+                    </li>
+                </ul>
+            </li>
+        </ol>
     </section>
 
     <section class="config">    
