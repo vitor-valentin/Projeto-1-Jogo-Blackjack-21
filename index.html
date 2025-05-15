@@ -76,13 +76,16 @@
 
         <div class="smallMenu">
             <div class="gameBtn" id="rules">
-                <img src="imgs/help.png" />
+                <img src="imgs/help.png" alt="Como jogar" />
             </div>
             <div class="gameBtn" id="config">
-                <img src="imgs/settings.png" />
+                <img src="imgs/settings.png" alt="Configurações" />
             </div>
             <div class="gameBtn" id="restart">
-                <img src="imgs/reload.png" />
+                <img src="imgs/reload.png" alt="Reiniciar jogo" />
+            </div>
+            <div class="gameBtn" id="historyBtn">
+                <img src="imgs/history.png" alt="Histórico" />
             </div>
         </div>
     </section>
@@ -200,6 +203,26 @@
     <audio id="seChips"><source src="sounds/chips.mp3" /></audio>
     <audio id="seDeal"><source src="sounds/deal.mp3" /></audio>
     <audio id="seFlip"><source src="sounds/flip.mp3" /></audio>
+
+    <div id="notification" class="notification hidden"></div>
+
+    <div id="alertBanner" class="alert-banner hidden"></div>
+
+    <div id="gameOverModal" class="game-over-modal hidden">
+        <div class="game-over-box">
+            <h2>Fim de Jogo</h2>
+            <p>Você ficou sem fichas para apostar.</p>
+            <button id="restartGameBtn">Reiniciar</button>
+        </div>
+    </div>
+
+    <div id="historyPanel" class="history-panel hidden">
+        <div class="history-header">
+            <h3>Histórico de Rodadas</h3>
+            <span id="closeHistory" class="close-history">✖</span>
+        </div>
+        <div id="historyContent" class="history-content"></div>
+    </div>
 
     <script src="script.js"></script>
 </body>
