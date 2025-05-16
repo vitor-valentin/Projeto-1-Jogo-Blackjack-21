@@ -326,7 +326,7 @@ section .closeBtn{
 
 .smallMenu{
     position: absolute;
-    width: 175px;
+    width: 225px;
     height: 50px;
     left: 2vh;
     bottom: 2vh;
@@ -649,6 +649,173 @@ input[type="number"] {
     background-size: cover;
     transition: all 0.5s ease;
     transform: translate(700px, 700px);
+}
+
+.notification {
+    position: fixed;
+    top: 5vh;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #e2c598;
+    color: #2f230c;
+    padding: 20px 40px;
+    font-family: sindelarBold;
+    font-size: 24px;
+    border-radius: 10px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    opacity: 0.95;
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+.notification.hidden {
+    opacity: 0;
+}
+
+.game-over-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(26, 78, 45, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1001;
+}
+
+.game-over-modal.hidden {
+    display: none;
+}
+
+.game-over-box {
+    background-color: #e2c598;
+    padding: 40px 60px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    font-family: 'sindelarBold';
+    color: #2f230c;
+}
+
+.game-over-box h2 {
+    font-size: 48px;
+    margin-bottom: 20px;
+    font-family: 'raniraBold';
+}
+
+.game-over-box p {
+    font-size: 24px;
+    margin-bottom: 30px;
+}
+
+.game-over-box button {
+    padding: 15px 40px;
+    font-size: 22px;
+    background-color: #2f230c;
+    color: #e2c598;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    font-family: 'sindelarBold';
+}
+
+.game-over-box button:hover {
+    transform: scale(1.05);
+}
+
+.alert-banner {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #2f230c;
+    color: #e2c598;
+    border: 2px solid #e2c598;
+    padding: 15px 30px;
+    font-family: sindelarBold;
+    font-size: 22px;
+    border-radius: 8px;
+    z-index: 1000;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+    opacity: 0.95;
+    transition: all 0.3s ease;
+}
+
+.alert-banner.hidden {
+    display: none;
+}
+
+.history-panel {
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 350px;
+    height: 100vh;
+    background-color: #1a4e2d;
+    border-left: 2px solid #e2c598;
+    z-index: 1002;
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.4s ease;
+    font-family: sindelarBold;
+    color: #e2c598;
+    box-shadow: -5px 0 15px rgba(0,0,0,0.3);
+}
+
+.history-panel.visible {
+    transform: translateX(0);
+}
+
+.history-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 2px solid #e2c598;
+}
+
+.history-header h3 {
+    margin: 0;
+    font-size: 26px;
+    font-family: raniraBold;
+}
+
+.close-history {
+    font-size: 26px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.close-history:hover {
+    transform: scale(1.1);
+}
+
+.history-content {
+    padding: 20px;
+    overflow-y: auto;
+    flex-grow: 1;
+    scrollbar-width: thin;
+    scrollbar-color: #b19464 transparent;
+}
+
+.history-entry {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e2c598;
+    font-size: 18px;
+}
+
+.history-content::-webkit-scrollbar {
+    width: 8px;
+}
+  
+.history-content::-webkit-scrollbar-thumb {
+    background-color: #b19464;
+    border-radius: 4px;
 }
 
 @media (max-width: 1366px) {

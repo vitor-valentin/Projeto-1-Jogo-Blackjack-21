@@ -1,8 +1,3 @@
-//TODO: 
-// Round lost and won notification
-// Not enough chips
-// Losing message
-
 //Game constants
 const cardImages = [];
 const values = [
@@ -33,6 +28,9 @@ var points = [0, 0];
 var dealingInProgress = false;
 var gameReloading = false;
 var standed = false;
+let roundNumber = 1;
+let historyData = [];
+let startingRound = false;
 
 // DOM Elements
 //Main Menu Buttons
@@ -61,6 +59,7 @@ const stand = document.getElementById("stand");
 const hit = document.getElementById("hit");
 const double = document.getElementById("double");
 const restart = document.getElementById("restart");
+const restartGame = document.getElementById("restartGameBtn");
 //Game elements
 const cardStack = document.querySelector(".card-stack");
 const cardSpots = [
@@ -81,6 +80,9 @@ const startChips = document.getElementById("startingChips");
 const chipsBet = document.getElementById("chipsBet");
 //Other buttons
 const closeBtn = document.querySelectorAll("#closeBtn");
+const historyBtn = document.getElementById("historyBtn");
+const historyPanel = document.getElementById("historyPanel");
+const closeHistory = document.getElementById("closeHistory");
 
 //Miscelaneous functions
 function delay(ms)
@@ -125,13 +127,60 @@ function moveElement(card, destination, flip, pointer, returning = false)
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
                     flipCard(card, pointer);
-                    setTimeout(() => {if (returning) card.style.display = "none"}, 1000)
+                    setTimeout(() => {if (returning) card.remove();}, 1000)
                 });
             });
         }
 
         dealingInProgress = false;
     });
+}
+
+function addToHistory(result, playerPts, dealerPts, chips) {
+    historyData.push({
+        round: roundNumber,
+        result,
+        playerPts,
+        dealerPts,
+        chips
+    });
+
+    const entry = document.createElement("div");
+    entry.classList.add("history-entry");
+    entry.innerHTML = `
+        <b>Rodada ${roundNumber}:</b> ${result}<br>
+        🧑 Jogador: ${playerPts} pontos<br>
+        🃏 Dealer: ${dealerPts} pontos<br>
+        💰 Fichas: ${chips > 0 ? "+" : ""}${chips}
+    `;
+
+    document.getElementById("historyContent").appendChild(entry);
+    roundNumber++;
+}
+
+function showNotification(message, duration = 2500) {
+    const notification = document.getElementById("notification");
+    notification.textContent = message;
+    notification.classList.remove("hidden");
+
+    setTimeout(() => {
+        notification.classList.add("hidden");
+    }, duration);
+}
+
+function showAlertBanner(message, duration = 3000) {
+    const alert = document.getElementById("alertBanner");
+    alert.textContent = message;
+    alert.classList.remove("hidden");
+
+    setTimeout(() => {
+        alert.classList.add("hidden");
+    }, duration);
+}
+
+function showGameOverModal() {
+    const modal = document.getElementById("gameOverModal");
+    modal.classList.remove("hidden");
 }
 
 function playSound(sound)
@@ -266,6 +315,9 @@ function returnCards()
     cardSpots.forEach((type) => {
         type.forEach((spot) => {
             let card = spot.querySelector(".cardContainer");
+
+            if (!card) return;
+
             let flip;
             try
             {
@@ -281,6 +333,7 @@ function returnCards()
 
     extraCardsSpots.forEach((spot) => {
         spot.querySelectorAll(".cardContainer").forEach((card) => {
+            card.style.transform = "none";
             setTimeout(moveElement, (250 * c), card, cardStack, true, (spot.parentElement.parentElement.classList.contains("player") ? 2 : 3), true)
             c++;
         });
@@ -292,101 +345,151 @@ function returnCards()
 async function returnAllChips(remove = false)
 {
     let chips = document.querySelectorAll(".chip");
+    const delayTime = getChipDelay(chips.length);
 
-    chips.forEach(async (chip) => {
+    for (const chip of chips)
+    {
         if(remove)
         {
             chip.remove();
-        }else{
-            moveChip(chip, true);
-            await delay(100);
+        } else {
+            moveChip(chip, true, true);
+            await delay(delayTime);
         }
-    });
+    }
 }
 
-async function changeScreenVariableAnim(pointer)
-{
-    let newValue;
-    let oldValue = screenVariables[pointer].textContent;
+function getChipDelay(totalChips) {
+    if (totalChips <= 20) return 100;
+    
+    if (totalChips <= 100) return Math.max(20, 100 - Math.floor(totalChips / 2));
+    
+    return 10;
+}
 
-    switch(pointer)
-    {
-        case 0:
-            newValue = totalChips;
-        case 1:
-            newValue = betted;
+async function changeScreenVariableAnim(pointer) {
+    let oldValue = parseInt(screenVariables[pointer].textContent);
+    let newValue = (pointer === 0) ? totalChips : betted;
+    let difference = newValue - oldValue;
+
+    if (difference === 0) return;
+
+    let steps = Math.min(100, Math.abs(difference)); 
+    let stepValue = Math.ceil(Math.abs(difference) / steps) || 1;
+    let delayMs = 10;
+
+    if (Math.abs(difference) > 1000) {
+        delayMs = 1;
+    } else if (Math.abs(difference) > 500) {
+        delayMs = 5;
     }
 
-    for(let i = oldValue; i <= newValue; i++)
-    {
-        changeScreenVariable(i, pointer);
-        await delay(10);
+    let current = oldValue;
+    let increment = difference > 0 ? stepValue : -stepValue;
+
+    while ((increment > 0 && current < newValue) || (increment < 0 && current > newValue)) {
+        current += increment;
+
+        if ((increment > 0 && current > newValue) || (increment < 0 && current < newValue)) {
+            current = newValue;
+        }
+
+        changeScreenVariable(current, pointer);
+        await delay(delayMs);
     }
+
+    await delay(500);
 }
 
 async function playerWon()
 {
+    if(!gameRunning) return;
+    gameRunning = false;
+
     gameReloading = true;
+    showNotification("Você venceu a rodada!");
 
     let oldBetted = betted;
     betted *= chipsMultiplier;
     let amount = betted - oldBetted;
     amount = Math.round(amount / 50);
 
+    const delayTime = getChipDelay(amount);
+
     for(let i = 0; i < amount; i++)
     {
         await createChip(true);
-        await delay(150);
+        await delay(delayTime);
     }
     
     await changeScreenVariableAnim(1);
 
     totalChips += betted;
+
+    addToHistory("Vitória", points[0], points[1], betted);
+    
     betted = 0;
     
     changeScreenVariable(0, 1);
     await changeScreenVariableAnim(0);
 
-
     await returnAllChips();
 
     let c = returnCards();
 
-    setTimeout(startRound, (500 * c));
- 
+    await delay(500 * c);
+    gameReloading = false;
+    startRound();
 }
 
 async function playerLost()
 {
+
+    if(!gameRunning) return;
+    gameRunning = false;
+    
     gameReloading = true;
+    showNotification("Você perdeu a rodada!");
 
     changeScreenVariable(0, 1);
+
+    addToHistory("Derrota", points[0], points[1], -betted);
+    
     betted = 0;
 
     await returnAllChips(true);
-    await delay(1000);
 
     let c = returnCards();
 
-    setTimeout(startRound, (500 * c));
+    await delay(500 * c);
+
+    gameReloading = false;
+    startRound();
 }
 
 async function playerTied()
 {
+    if(!gameRunning) return;
+    gameRunning = false;
+    
     gameReloading = true;
+    showNotification("Empate!");
 
     totalChips += betted;
     betted = 0;
+
+    addToHistory("Empate", points[0], points[1], 0);
 
     changeScreenVariable(0, 1);
     await changeScreenVariableAnim(0);
 
     await returnAllChips();
-    await delay(1000);
 
     let c = returnCards();
 
-    setTimeout(startRound, (500 * c));
+    await delay(500 * c);
+    gameReloading = false;
+    startRound();
 }
 
 function verifyHasAce(index, newValue)
@@ -401,10 +504,20 @@ function verifyHasAce(index, newValue)
             }
         }
     });
+    extraCardsSpots[index].querySelectorAll(".cardContainer").forEach((card) => {
+        if(card != null)
+        {
+            if(card.getAttribute("value") == "ace" && newValue > 21)
+            {
+                card.setAttribute("value", "1");
+                points[index] -= 10;
+            }
+        }
+    });
 }
 
 function countPoints(card, pointer){
-    if(gameReloading) return;
+    if(gameReloading || !gameRunning) return;
     
     var value = card.getAttribute("value");
     var index = pointer-2;
@@ -412,34 +525,46 @@ function countPoints(card, pointer){
     if(value == "ace")
     {
         value = (points[index] + 11) > 21 ? 1 : 11;
+        if(value == 1){
+            card.setAttribute("value", "1");
+        }
     }
 
     verifyHasAce(index, (points[index] + parseInt(value)));
 
+
     points[index] += parseInt(value);
     changeScreenVariable(points[index], pointer);
 
-    if(points[index] > 21)
-    {
-        if(index == 0) setTimeout(playerLost, 2000);
-        if(index == 1) setTimeout(playerWon, 2000);
-    }else if(points[index] == 21)
-    {
-        if(index == 0) setTimeout(playerWon, 2000);
-        if(index == 1) setTimeout(playerLost, 2000);
+    if(pointer === 2) {
+        if(points[index] > 21) {
+            setTimeout(playerLost, 2000);
+        } else if(points[index] == 21) {
+            setTimeout(playerWon, 2000);
+        }
     }
+}
+
+function cleanupCards()
+{
+    document.querySelectorAll(".cardContainer").forEach(card => {
+        if (card.parentElement === cardStack) {
+            card.remove();
+        }
+    });
 }
 
 function drawCard(pointer, flip, destination)
 {
     let randomCard = selectRandomCard();
+    
     let card = createCard(randomCard, bgCard);
 
     moveElement(card, destination, flip, pointer);
     return card;
 }
 
-function moveChip(chip, type = "deal")
+function moveChip(chip, type = "deal", remove = false)
 {
     let distance = type == "deal" ? "0" : "700px";
     chip = chip.style == undefined ? chip[0] : chip;
@@ -447,17 +572,30 @@ function moveChip(chip, type = "deal")
     requestAnimationFrame(() => {
         chip.style.transform = `translate(${distance}, ${distance})`;
         playSound(seChips);
+        if (remove) setTimeout(() => {chip.remove()}, 500);
     });
 }
 
 function startRound()
 {
-    gameRunning = true;
+    if (startingRound) return;
+
+    startingRound = true;
     gameReloading = false;
+
+    cleanupCards();
+
+    if (totalChips < betChips) {
+        showGameOverModal();
+        gameRunning = false;
+        return;
+    }
+
+    gameRunning = true;
     standed = false;
 
-    resetRemainingCards();
     resetPoints();
+    resetRemainingCards();
 
     bet(betChips);
     
@@ -468,6 +606,7 @@ function startRound()
             c++;
         });
     });
+    startingRound = false;
 }
 
 function countExtraCards()
@@ -510,15 +649,9 @@ function calculateDrawRisk(botPoints, deck)
 
 function dealerDecisionMaking()
 {
-    if(points[1] > points[0])
-    {
-        return false;
-    }
-
-    if(points[0] > points[1])
-    {
-        return true;
-    }
+    if(points[1] > points[0]) return false;
+    if(points[0] > points[1]) return true;
+    if (points[1] >= 21) return false;
 
     let risk = calculateDrawRisk(points[1], remainingCards);
     return risk < 0.7;
@@ -526,8 +659,7 @@ function dealerDecisionMaking()
 
 async function hitOption(pointer)
 {
-    if (dealingInProgress) return;
-    if (standed && pointer != 3) return;
+    if (dealingInProgress || (standed && pointer != 3) || !gameRunning) return;
 
     let newCard = selectRandomCard();
     let marginLeft = countExtraCards()[pointer-2];
@@ -535,43 +667,65 @@ async function hitOption(pointer)
     marginLeft += "px";
     let card = createCard(newCard, bgCard);
     setTimeout(moveElement, 250, card, extraCardsSpots[pointer-2], true, pointer);
-    setTimeout(() => {card.style.marginLeft = marginLeft}, 1000)
+    setTimeout(() => {card.style.transform = `translateX(${marginLeft})`;}, 1000)
     await delay(1000);
 }
 
 async function standOption()
 {
-    if (dealingInProgress) return;
-    if (standed) return;
+    if (dealingInProgress || standed || !gameRunning) return;
 
-    standed = true;
+    try
+    {
+        standed = true;
 
-    cardSpots[1].forEach((spot) => {
-        const card = spot.querySelector(".cardContainer");
-        if(!card.firstChild.classList.contains("flip"))
-        {
-            flipCard(card, 3);
+        cardSpots[1].forEach((spot) => {
+            const card = spot.querySelector(".cardContainer");
+            if(!card.firstChild.classList.contains("flip"))
+            {
+                flipCard(card, 3);
+            }
+        });
+    }catch(error)
+    {
+        standed = false;
+        return;
+    }
+
+    if(points[1] === 21) {
+        if(points[0] === 21) {
+            await playerTied();
+        } else {
+            await playerLost();
         }
-    });
+        return;
+    }
 
     while(dealerDecisionMaking())
     {
         await hitOption(3);
     }
 
-    if(points[1] > points[0] && points[1] < 21)
-    {
-        playerLost();
-    }else if(points[1] == points[0])
-    {
-        playerTied();
+    if(points[1] > 21) {
+        await playerWon();
+    } else if(points[1] === points[0]) {
+        await playerTied();
+    } else if(points[1] > points[0]) {
+        await playerLost();
+    } else {
+        await playerWon();
     }
 }
 
 async function doubleOption()
 {
-    if (dealingInProgress) return;
-    if (standed) return;
+    if (dealingInProgress || standed || !gameRunning) return;
+
+    if(totalChips < betChips)
+    {
+        showAlertBanner("Você não tem fichas suficientes para dobrar.");
+        return;
+    }
 
     drawCard(2, true, extraCardsSpots[0]);
 
@@ -600,8 +754,26 @@ function reloadGame()
 
     changeScreenVariable(totalChips, 0);
     changeScreenVariable(0, 1);
+    returnAllChips();
+
+    document.getElementById("historyContent").innerHTML = "";
+    historyData = [];
+    roundNumber = 1;
     
-    setTimeout(startRound, (500 * c));
+    setTimeout(() => {
+        gameReloading = false;
+        gameRunning = false;
+        startRound();
+    }, (500 * c));
+}
+
+function validateConfigInput(input, min, defaultValue) {
+    const value = parseInt(input.value);
+    if (isNaN(value) || value < min) {
+        input.value = defaultValue;
+        return defaultValue;
+    }
+    return value;
 }
 
 //Menu Event Listeners
@@ -669,51 +841,42 @@ backCardOptions.forEach((option) => {
     });
 });
 
-multiplier.addEventListener("input", () => {
-    if (multiplier.value !== "" && parseInt(multiplier.value) < 2) {
-        multiplier.value = 2;
-    }
-    chipsMultiplier = multiplier.value != "" ? parseInt(multiplier.value) : 2;
+multiplier.addEventListener("blur", () => {
+    chipsMultiplier = validateConfigInput(multiplier, 2, 2);
 });
 
 startChips.addEventListener("blur", () => {
-    if (parseInt(startChips.value) < 500 || startChips.value == "") {
-        startChips.value = 500;
-    }
-    startingChips = parseInt(startChips.value);
-    if(!gameRunning)
-    {
+    startingChips = validateConfigInput(startChips, 500, 500);
+    if (!gameRunning) {
         totalChips = startingChips;
         changeScreenVariable(totalChips, 0);
     }
 });
 
 chipsBet.addEventListener("blur", () => {
-    if (parseInt(chipsBet.value) < 50 || chipsBet.value == "") {
-        chipsBet.value = 50;
-    }
-    betChips = parseInt(chipsBet.value);
+    betChips = validateConfigInput(chipsBet, 50, 50);
 });
 
 //Game Event Listeners
+
+hit.addEventListener("click", () => hitOption(2));
+stand.addEventListener("click", standOption);
+double.addEventListener("click", doubleOption);
+restart.addEventListener("click", reloadGame);
+
 cardStack.addEventListener("click", () => {
-    if(!gameRunning){
-        startRound();
+    if(!gameRunning && !gameReloading) startRound();
+});
 
-        hit.addEventListener("click", () => {
-            hitOption(2);
-        });
+restartGame.addEventListener("click", () => {
+    document.getElementById("gameOverModal").classList.add("hidden");
+    reloadGame();
+});
 
-        stand.addEventListener("click", () => {
-            standOption();
-        });
+historyBtn.addEventListener("click", () => {
+    historyPanel.classList.add("visible");
+});
 
-        double.addEventListener("click", () => {
-            doubleOption();
-        });
-
-        restart.addEventListener("click", () => {
-            reloadGame();
-        });
-    }
+closeHistory.addEventListener("click", () => {
+    historyPanel.classList.remove("visible");
 });
