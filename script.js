@@ -1,4 +1,3 @@
-//Bug after winning points
 //Game constants
 const cardImages = [];
 const values = [
@@ -128,7 +127,7 @@ function moveElement(card, destination, flip, pointer, returning = false)
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
                     flipCard(card, pointer);
-                    setTimeout(() => {if (returning) card.style.display = "none"}, 1000)
+                    setTimeout(() => {if (returning) card.remove();}, 1000)
                 });
             });
         }
@@ -346,6 +345,7 @@ function returnCards()
 async function returnAllChips(remove = false)
 {
     let chips = document.querySelectorAll(".chip");
+    const delayTime = getChipDelay(chips.length);
 
     for (const chip of chips)
     {
@@ -354,9 +354,17 @@ async function returnAllChips(remove = false)
             chip.remove();
         } else {
             moveChip(chip, true, true);
-            await delay(100);
+            await delay(delayTime);
         }
     }
+}
+
+function getChipDelay(totalChips) {
+    if (totalChips <= 20) return 100;
+    
+    if (totalChips <= 100) return Math.max(20, 100 - Math.floor(totalChips / 2));
+    
+    return 10;
 }
 
 async function changeScreenVariableAnim(pointer) {
@@ -389,11 +397,12 @@ async function changeScreenVariableAnim(pointer) {
         changeScreenVariable(current, pointer);
         await delay(delayMs);
     }
+
+    await delay(500);
 }
 
 async function playerWon()
 {
-    console.log("playerWon chamado", new Date().toISOString());
     if(!gameRunning) return;
     gameRunning = false;
 
@@ -405,10 +414,12 @@ async function playerWon()
     let amount = betted - oldBetted;
     amount = Math.round(amount / 50);
 
+    const delayTime = getChipDelay(amount);
+
     for(let i = 0; i < amount; i++)
     {
         await createChip(true);
-        await delay(150);
+        await delay(delayTime);
     }
     
     await changeScreenVariableAnim(1);
@@ -424,17 +435,16 @@ async function playerWon()
 
     await returnAllChips();
 
-    resetPoints();
-    returnCards();
+    let c = returnCards();
 
-    await delay(1000);
+    await delay(500 * c);
     gameReloading = false;
     startRound();
 }
 
 async function playerLost()
 {
-    console.log("playerLost chamado", new Date().toISOString());
+
     if(!gameRunning) return;
     gameRunning = false;
     
@@ -449,17 +459,16 @@ async function playerLost()
 
     await returnAllChips(true);
 
-    resetPoints();
-    returnCards();
+    let c = returnCards();
 
-    await delay(1000);
+    await delay(500 * c);
+
     gameReloading = false;
     startRound();
 }
 
 async function playerTied()
 {
-    console.log("playerTied chamado", new Date().toISOString());
     if(!gameRunning) return;
     gameRunning = false;
     
@@ -476,10 +485,9 @@ async function playerTied()
 
     await returnAllChips();
 
-    resetPoints();
-    returnCards();
+    let c = returnCards();
 
-    await delay(1000);
+    await delay(500 * c);
     gameReloading = false;
     startRound();
 }
@@ -509,7 +517,7 @@ function verifyHasAce(index, newValue)
 }
 
 function countPoints(card, pointer){
-    if(gameReloading) return;
+    if(gameReloading || !gameRunning) return;
     
     var value = card.getAttribute("value");
     var index = pointer-2;
@@ -524,18 +532,26 @@ function countPoints(card, pointer){
 
     verifyHasAce(index, (points[index] + parseInt(value)));
 
+
     points[index] += parseInt(value);
     changeScreenVariable(points[index], pointer);
 
-    if(points[index] > 21)
-    {
-        if(index == 0) setTimeout(playerLost, 2000);
-        if(index == 1) setTimeout(playerWon, 2000);
-    }else if(points[index] == 21)
-    {
-        if(index == 0) setTimeout(playerWon, 2000);
-        if(index == 1) setTimeout(playerLost, 2000);
+    if(pointer === 2) {
+        if(points[index] > 21) {
+            setTimeout(playerLost, 2000);
+        } else if(points[index] == 21) {
+            setTimeout(playerWon, 2000);
+        }
     }
+}
+
+function cleanupCards()
+{
+    document.querySelectorAll(".cardContainer").forEach(card => {
+        if (card.parentElement === cardStack) {
+            card.remove();
+        }
+    });
 }
 
 function drawCard(pointer, flip, destination)
@@ -562,11 +578,12 @@ function moveChip(chip, type = "deal", remove = false)
 
 function startRound()
 {
-    console.log("startRound chamado", new Date().toISOString());
     if (startingRound) return;
 
     startingRound = true;
     gameReloading = false;
+
+    cleanupCards();
 
     if (totalChips < betChips) {
         showGameOverModal();
@@ -577,6 +594,7 @@ function startRound()
     gameRunning = true;
     standed = false;
 
+    resetPoints();
     resetRemainingCards();
 
     bet(betChips);
@@ -674,21 +692,28 @@ async function standOption()
         return;
     }
 
+    if(points[1] === 21) {
+        if(points[0] === 21) {
+            await playerTied();
+        } else {
+            await playerLost();
+        }
+        return;
+    }
+
     while(dealerDecisionMaking())
     {
         await hitOption(3);
     }
 
-    if(points[1] > points[0] && points[1] < 21)
-    {
-        playerLost();
-    }else if(points[1] == points[0])
-    {
-        playerTied();
-    }
-    else
-    {   
-        playerWon();
+    if(points[1] > 21) {
+        await playerWon();
+    } else if(points[1] === points[0]) {
+        await playerTied();
+    } else if(points[1] > points[0]) {
+        await playerLost();
+    } else {
+        await playerWon();
     }
 }
 
@@ -740,6 +765,15 @@ function reloadGame()
         gameRunning = false;
         startRound();
     }, (500 * c));
+}
+
+function validateConfigInput(input, min, defaultValue) {
+    const value = parseInt(input.value);
+    if (isNaN(value) || value < min) {
+        input.value = defaultValue;
+        return defaultValue;
+    }
+    return value;
 }
 
 //Menu Event Listeners
@@ -807,30 +841,20 @@ backCardOptions.forEach((option) => {
     });
 });
 
-multiplier.addEventListener("input", () => {
-    if (multiplier.value !== "" && parseInt(multiplier.value) < 2) {
-        multiplier.value = 2;
-    }
-    chipsMultiplier = multiplier.value != "" ? parseInt(multiplier.value) : 2;
+multiplier.addEventListener("blur", () => {
+    chipsMultiplier = validateConfigInput(multiplier, 2, 2);
 });
 
 startChips.addEventListener("blur", () => {
-    if (parseInt(startChips.value) < 500 || startChips.value == "") {
-        startChips.value = 500;
-    }
-    startingChips = parseInt(startChips.value);
-    if(!gameRunning)
-    {
+    startingChips = validateConfigInput(startChips, 500, 500);
+    if (!gameRunning) {
         totalChips = startingChips;
         changeScreenVariable(totalChips, 0);
     }
 });
 
 chipsBet.addEventListener("blur", () => {
-    if (parseInt(chipsBet.value) < 50 || chipsBet.value == "") {
-        chipsBet.value = 50;
-    }
-    betChips = parseInt(chipsBet.value);
+    betChips = validateConfigInput(chipsBet, 50, 50);
 });
 
 //Game Event Listeners
